@@ -1,0 +1,34 @@
+﻿@{
+    ViewBag.Title = "Weather";
+}
+
+<h2>Weather</h2>
+
+
+<p id="city1"> </p>
+<p id="temp1"> </p>
+<p id="pressure1"> </p>
+<p id="dec1"> </p>
+<br/>
+<p id="city2"> </p>
+<p id="temp2"> </p>
+<p id="pressure2"> </p>
+<p id="dec2"> </p>
+
+
+<button id="btn">Get current weather</button>
+<script>
+    $(document).ready(function() {
+            $.get("@Url.Action("GetWeatherForFiveDays", "Home")",
+                function(response) {
+                    //response
+                        $("#city1").text(response.list[0].city.name);
+                        $("#temp1").text(response.list[0].main.temp);
+                        $("#pressure1").text(response.main.pressure);
+                        $("#dec1").text(response.weather[0].description);
+                        console.log(response);
+                });
+        
+    });
+
+</script>

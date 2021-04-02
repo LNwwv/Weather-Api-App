@@ -1,0 +1,69 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="jumbotron">
+    <h2>Check weather. Choose city from wherever.</h2>
+    <hr/>
+</div>
+
+<br/>
+<div>
+    <div class="col-lg-12 jumbotron">
+        <img id="icon" src=""/>
+        <div>
+            Current Condition <span data-bind="text:name">waiting...</span><br/>
+            Country <span data-bind="text:sys.country">waiting...</span><br/>
+            Temperature <span data-bind="text:main.feels_like">waiting...</span><b>&deg; C</b><br/>
+            Temperature feels like <span data-bind="text:main.temp">waiting...</span><b>&deg; C</b><br/>
+        </div>
+    </div>
+    <div class="form-group" name="form">
+
+
+        <div>
+            <div class="alert alert-danger" style="display: none;" id="errorMessage" role="alert">
+
+            </div>
+            <input id="City" class="form-control" placeholder="Enter City Name"/>
+        </div><br/>
+
+        <div>
+            <button type="submit" class="btn btn-outline-primary" onclick="CallWeatherApi();">Submit</button>
+            <button class="btn btn-primary disabled" onclick="location.href='@Url.Action("Index")'">Go back to menu</button>
+        </div>
+    </div>
+</div>
+<br/>
+
+
+<script>
+    function CallWeatherApi() {
+        var action = '@Url.Action("GetWeather")';
+        var city = $("#City").val();
+        if (city.trim().length === 0) {
+            var div = document.getElementById('errorMessage');
+            $('#errorMessage').css('display', 'block');
+            div.innerHTML = 'Please enter a City';
+            div.show();
+            return false;
+        } else {
+            var weather = Object();
+            var url = action + "?city=" + city;
+
+            $.ajax({
+                    url: url,
+                    method: 'GET',
+                    success: function(response) {
+                        console.log(response);
+                        weather = ko.mapping.fromJS(response);
+                        ko.applyBindings(weather);
+                        $("#dec").text(response.weather[0].description);
+                        $("#icon").attr("src", "http://openweathermap.org/img/w/" + response.weather[0].icon + ".png");
+                    }
+                }
+            );
+        }
+    }
+</script>
+

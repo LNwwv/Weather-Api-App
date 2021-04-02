@@ -1,0 +1,16 @@
+﻿<br/>
+<h2> Select what you want to do</h2>
+<hr/>
+<div class="table-bordered accordion">
+
+    <button type="button" class="btn btn-primary btn-lg btn-block" 
+            onclick="location.href='@Url.Action("WeatherInCity")'">Check weather in your city!</button>
+
+    <button type="button" class="btn btn-primary btn-lg btn-block" 
+            onclick="location.href='@Url.Action("DetailsWeather")'">Check weather in your city but with more details!</button>
+
+    <button type="button" class="btn btn-primary btn-lg btn-block" 
+            onclick="location.href = '@Url.Action("FiveDaysWeather")'">Check weather for 5 days!</button>
+    
+
+</div>
