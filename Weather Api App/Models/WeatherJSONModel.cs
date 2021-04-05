@@ -28,6 +28,8 @@ namespace Weather_Api_App.Models
 
     public class Rootobject
     {
+        internal object main;
+
         public string cod { get; set; }
         public int message { get; set; }
         public int cnt { get; set; }

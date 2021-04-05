@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
+﻿using System.Configuration;
 using System.Net;
-using System.Net.Http;
-using System.Web.Helpers;
-using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Script.Serialization;
-using Microsoft.Ajax.Utilities;
-using Newtonsoft.Json;
 using Weather_Api_App.Models;
 
 namespace Weather_Api_App.Controllers
@@ -42,7 +35,6 @@ namespace Weather_Api_App.Controllers
             return View();
         }
 
-
         public JsonResult GetWeather(string city)
         {
             var weath = new JsonEditor();
@@ -68,16 +60,14 @@ namespace Weather_Api_App.Controllers
             var url = string.Format("https://api.openweathermap.org/data/2.5/forecast?q={0}&APPID={1}&units=metric", city, _apiKey);
             var client = new WebClient();
             var content = client.DownloadString(url);
-            Rootobject weatherInfo = new JavaScriptSerializer().Deserialize<Rootobject>(content);
 
+            Rootobject weatherJsonData = new JavaScriptSerializer().Deserialize<Rootobject>(content);
 
             //Get selected values and return it to page
+            var selectedWeatherData = new JavaScriptSerializer()
+                .Serialize(serial.SelectWeatherDetails(weatherJsonData));
 
-            var checkValue = weatherInfo;
-
-            var returnValue = new JavaScriptSerializer().Serialize(serial.SelectValue(checkValue));
-
-            return returnValue;
+            return selectedWeatherData;
         }
     }
 }

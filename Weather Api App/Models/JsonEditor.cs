@@ -1,24 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Globalization;
-using System.Linq;
-using System.Net;
-using System.Runtime.Remoting.Messaging;
-using System.Web;
-using System.Web.Http.Results;
-using System.Web.Mvc;
 using System.Web.Script.Serialization;
-using System.Web.UI.WebControls;
-using System.Web.WebPages;
-using Microsoft.Ajax.Utilities;
-using Weather_Api_App.Controllers;
 
 namespace Weather_Api_App.Models
 {
     public class JsonEditor
     {
+        private int _counter;
+        private double _avgMinTemp;
+        private double _avgMaxTemp;
+        private double _avgTempFeelsLike;
+        private double _avgTemp;
+        private double _avgHumidity;
+        private double _avgVisibility;
+        private double _avgPressure;
+        private double _avgWindSpeed;
+        private SegregationModel _weatherDataToReturn = new SegregationModel();
+
+
         public object Deserializer(string content)
         {
             var serializer = new JavaScriptSerializer();
@@ -26,120 +26,113 @@ namespace Weather_Api_App.Models
             return jsonContent;
         }
 
-        public object SelectValue(Rootobject value)
+        /*
+         * Method that is resposible for select weather data,
+         * because WeatherApi gives us data
+         * for every 3 next hours and we need to select it for each day
+         */
+        public SegregationModel SelectWeatherDetails(Rootobject mainJsonDataFromApi)
         {
-            var currentDateTime = DateTime.Now.Day;
-            var weatherDataToReturn = new SegregationModel();
-            weatherDataToReturn = AddStaticValuesToSegregationModel(value);
+            var presentDay = DateTime.Now.Day;
 
-            //helper parameters
-            var counter = 0;
-            float avgMinTemp = 0;
-            float avgMaxTemp = 0;
-            float avgTempFeelsLike = 0;
-            float avgTemp = 0;
-            float avgHumidity = 0;
-            float avgVisibility = 0;
-            float avgPressure = 0;
-            float avgWindSpeed = 0;
+            AddStaticValuesToSegregationModel(mainJsonDataFromApi);
 
             //addind next days and divide it by counter to get avg weather data
-            foreach (var item in value.list)
+
+            foreach (var item in mainJsonDataFromApi.list)
             {
-                if (Convert.ToDateTime(item.dt_txt).Day == currentDateTime)
+                var dayInJsonData = Convert.ToDateTime(item.dt_txt);
+
+                if (dayInJsonData.Day == presentDay)
                 {
-                    counter++;
-                    avgMinTemp += item.main.temp_min;
-                    avgMaxTemp += item.main.temp_max;
-                    avgTempFeelsLike += item.main.feels_like;
-                    avgTemp += item.main.temp;
-                    avgHumidity += item.main.humidity;
-                    avgVisibility += item.visibility;
-                    avgPressure += item.main.pressure;
-                    avgWindSpeed += item.wind.speed;
+                    SumAvgValues(item);
                 }
                 // else if to catch 24:00/00:00
-                else if (Convert.ToDateTime(item.dt_txt).Day == currentDateTime+1)
+                else if (dayInJsonData.Day == presentDay + 1)
                 {
-                    counter++;
-                    avgMinTemp += item.main.temp_min;
-                    avgMaxTemp += item.main.temp_max;
-                    avgTempFeelsLike += item.main.feels_like;
-                    avgTemp += item.main.temp;
-                    avgHumidity += item.main.humidity;
-                    avgVisibility += item.visibility;
-                    avgPressure += item.main.pressure;
-                    avgWindSpeed += item.wind.speed;
-
-                    weatherDataToReturn.DataByDay.Add(
-                        new Day()
-                        {
-                            AvgFeelsLike = (avgTempFeelsLike / counter).ToString("0.00"),
-                            AvgMaxTemp = (avgMaxTemp / counter).ToString("0.00"),
-                            AvgMinTemp = (avgMinTemp / counter).ToString("0.00"),
-                            AvgTemp = (avgTemp / counter).ToString("0.00"),
-                            AvgHumidity = (avgHumidity / counter).ToString("0.00"),
-                            AvgVisibility = (avgVisibility / counter).ToString("0.00"),
-                            AvgPressure = (avgPressure / counter).ToString("0.00"),
-                            AvgWindSpeed = (avgWindSpeed / counter).ToString("0.00"),
-                            DayTime = Convert.ToDateTime(item.dt_txt).ToString("dddd dd MMMM",
-                                CultureInfo.CreateSpecificCulture("en-US")),
-
-                        }
-                    );
-                    counter = 0;
-                    avgMinTemp = 0;
-                    avgMaxTemp = 0;
-                    avgTempFeelsLike = 0;
-                    avgTemp = 0;
-                    avgHumidity = 0;
-                    avgVisibility = 0;
-                    avgPressure = 0;
-                    avgWindSpeed = 0;
-                    currentDateTime += 1;
+                    SumAvgValues(item);
+                    CalcutateAvgAndReturn(dayInJsonData);
+                    SetZeroToClassObjects();
+                    presentDay += 1;
                 }
                 else
                 {
-                    weatherDataToReturn.DataByDay.Add(
-                        new Day()
-                        {
-                            AvgFeelsLike = (avgTempFeelsLike / counter).ToString("0.00"),
-                            AvgMaxTemp = (avgMaxTemp / counter).ToString("0.00"),
-                            AvgMinTemp = (avgMinTemp / counter).ToString("0.00"),
-                            AvgTemp = (avgTemp / counter).ToString("0.00"),
-                            AvgHumidity = (avgHumidity / counter).ToString("0.00"),
-                            AvgVisibility = (avgVisibility / counter).ToString("0.00"),
-                            AvgPressure = (avgPressure / counter).ToString("0.00"),
-                            AvgWindSpeed = (avgWindSpeed / counter).ToString("0.00"),
-                            DayTime = Convert.ToDateTime(item.dt_txt).ToString("dddd dd MMMM",
-                                CultureInfo.CreateSpecificCulture("en-US")),
-                        }
-                    );
-                    counter = 0;
-                    avgMinTemp = 0;
-                    avgMaxTemp = 0;
-                    avgTempFeelsLike = 0;
-                    avgTemp = 0;
-                    avgHumidity = 0;
-                    avgVisibility = 0;
-                    avgPressure = 0;
-                    avgWindSpeed = 0;
-                    currentDateTime += 1;
+                    CalcutateAvgAndReturn(dayInJsonData);
+                    SetZeroToClassObjects();
+                    presentDay += 1;
                 }
             }
 
-            return weatherDataToReturn;
+            return _weatherDataToReturn;
         }
+
+
+        // Method responsible for calculate avg
+        private void CalcutateAvgAndReturn(DateTime date)
+        {
+            _weatherDataToReturn.DataByDay.Add(
+                new Day()
+                {
+                    AvgFeelsLike = (_avgTempFeelsLike / _counter).ToString("##.00"),
+                    AvgMaxTemp = (_avgMaxTemp / _counter).ToString("##.00"),
+                    AvgMinTemp = (_avgMinTemp / _counter).ToString("##.00"),
+                    AvgTemp = (_avgTemp / _counter).ToString("##.00"),
+                    AvgHumidity = (_avgHumidity / _counter).ToString("##.00"),
+                    AvgVisibility = (_avgVisibility / _counter).ToString("##.00"),
+                    AvgPressure = (_avgPressure / _counter).ToString("##.00"),
+                    AvgWindSpeed = (_avgWindSpeed / _counter).ToString("##.00"),
+                    DayTime = Convert.ToDateTime(date).ToString("dddd dd MMMM",
+                        CultureInfo.CreateSpecificCulture("en-US")),
+                }
+            );
+        }
+
         /*
-         * static values are values which presents
+         *  SetZeroToClassObjects is method which set to 0
+         *  every JsonEditor field that is needed to
+         *  calculate an avg from json data 
+         */
+
+        private void SetZeroToClassObjects()
+        {
+            _counter = 0;
+            _avgMinTemp = 0;
+            _avgMaxTemp = 0;
+            _avgTempFeelsLike = 0;
+            _avgTemp = 0;
+            _avgHumidity = 0;
+            _avgVisibility = 0;
+            _avgPressure = 0;
+            _avgWindSpeed = 0;
+        }
+
+        /*
+         *  SumAvgValues add sum of existing
+         *  Avg field and data from next 3 hr
+         */
+
+        private void SumAvgValues(List item)
+        {
+            _counter++;
+            _avgMinTemp += item.main.temp_min;
+            _avgMaxTemp += item.main.temp_max;
+            _avgTempFeelsLike += item.main.feels_like;
+            _avgTemp += item.main.temp;
+            _avgHumidity += item.main.humidity;
+            _avgVisibility += item.visibility;
+            _avgPressure += item.main.pressure;
+            _avgWindSpeed += item.wind.speed;
+        }
+
+        /*
+         * Static values are values which presents
          * weather data at the api weather call time
          */
-        private SegregationModel AddStaticValuesToSegregationModel(Rootobject value)
+        private void AddStaticValuesToSegregationModel(Rootobject value)
         {
-            var weatherDataToReturn = new SegregationModel();
-            weatherDataToReturn.CityName = value.city.name;
-            weatherDataToReturn.CountryName = value.city.country;
-            weatherDataToReturn.Coords = new List<Coord>
+            _weatherDataToReturn.CityName = value.city.name;
+            _weatherDataToReturn.CountryName = value.city.country;
+            _weatherDataToReturn.Coords = new List<Coord>
             {
                 new Coord()
                 {
@@ -147,9 +140,8 @@ namespace Weather_Api_App.Models
                     lon = value.city.coord.lon,
                 }
             };
-            weatherDataToReturn.DataByDay = new List<Day>
+            _weatherDataToReturn.DataByDay = new List<Day>
             {
-
                 new Day()
                 {
                     AvgFeelsLike = (value.list[0].main.feels_like).ToString("0.00"),
@@ -164,7 +156,6 @@ namespace Weather_Api_App.Models
                         CultureInfo.CreateSpecificCulture("en-US")),
                 }
             };
-            return weatherDataToReturn;
         }
     }
 }
