@@ -2,11 +2,9 @@
     ViewBag.Title = "Home Page";
 }
 
-<div class="jumbotron">
-    <h2>Check weather. Choose city from wherever.</h2>
-    <hr/>
-</div>
 
+<h2>Check weather. Choose city from wherever</h2>
+<hr/>
 <br/>
 <div>
     <div class="col-lg-12 jumbotron">
@@ -30,7 +28,7 @@
 
         <div>
             <button type="submit" class="btn btn-outline-primary" onclick="CallWeatherApi();">Submit</button>
-            <button class="btn btn-primary disabled" onclick="location.href='@Url.Action("Index")'">Go back to menu</button>
+            <button class="btn btn-primary disabled" onclick="location.href = '@Url.Action("Index")'">Go back to menu</button>
         </div>
     </div>
 </div>
@@ -55,15 +53,18 @@
                     url: url,
                     method: 'GET',
                     success: function(response) {
-                        console.log(response);
-                        weather = ko.mapping.fromJS(response);
-                        ko.applyBindings(weather);
-                        $("#dec").text(response.weather[0].description);
-                        $("#icon").attr("src", "http://openweathermap.org/img/w/" + response.weather[0].icon + ".png");
+                        if (response.length == 0) {
+                            alert('Invalid city name')
+                        } else {
+                            console.log(response);
+                            weather = ko.mapping.fromJS(response);
+                            ko.applyBindings(weather);
+                            $("#dec").text(response.weather[0].description);
+                            $("#icon").attr("src", "http://openweathermap.org/img/w/" + response.weather[0].icon + ".png");
+                        }
                     }
                 }
             );
         }
     }
 </script>
-

@@ -2,88 +2,88 @@
     ViewBag.Title = "Home Page";
 }
 
-<div class="jumbotron">
-    <h2>Check weather. Choose city from wherever</h2>
-    <h4>but with more details.</h4>
-    <hr/>
-    </div>
 
-<br />
+<h2>Check weather. Choose city from wherever</h2>
+<h4>but with more details.</h4>
+<hr/>
+
+
+<br/>
 <div class="form-group" name="form">
     <div class="table-responsive">
         <table class="table table-bordered table-dark table-striped">
             <thead class="thead-dark">
-                <tr>
-                    <th>Icon</th>
-                    <th>Current Condition</th>
-                    <th>City coordinates</th>
-                    <th>Country</th>
-                    <th>Description</th>
-                </tr>
+            <tr>
+                <th>Icon</th>
+                <th>Current Condition</th>
+                <th>City coordinates</th>
+                <th>Country</th>
+                <th>Description</th>
+            </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>
-                        <img id="icon" src="" />
-                    </td>
-                    <td>
-                        <b data-bind="text:name">waiting...</b>
-                    </td>
-                    <td><b data-bind="text:coord.lat">waiting...</b> x <b data-bind="text:coord.lon"></b></td>
-                    <td>
-                        <b data-bind="text:sys.country">waiting...</b>
-                    </td>
-                    <td>
-                        <b id="dec">waiting...</b>
-                    </td>
-                </tr>
+            <tr>
+                <td>
+                    <img id="icon" src=""/>
+                </td>
+                <td>
+                    <b data-bind="text:name">waiting...</b>
+                </td>
+                <td><b data-bind="text:coord.lat">waiting...</b> x <b data-bind="text:coord.lon"></b></td>
+                <td>
+                    <b data-bind="text:sys.country">waiting...</b>
+                </td>
+                <td>
+                    <b id="dec">waiting...</b>
+                </td>
+            </tr>
             </tbody>
         </table>
         <table class="table table-bordered table-dark">
             <thead class="thead-dark">
-                <tr>
-                    <th>Current pressure</th>
-                    <th>Temperature</th>
-                    <th>Temperature feels like</th>
-                    <th>Clouds</th>
-                    <th>Wind speed</th>
-                </tr>
+            <tr>
+                <th>Current pressure</th>
+                <th>Temperature</th>
+                <th>Temperature feels like</th>
+                <th>Clouds</th>
+                <th>Wind speed</th>
+            </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>
-                        <b data-bind="text:main.pressure">waiting...</b> <b>hPa</b>
-                    </td>
-                    <td>
-                        <b data-bind="text:main.temp">waiting...</b><b>&deg; C</b>
-                    </td>
-                    <td>
-                        <b data-bind="text:main.feels_like">waiting...</b><b>&deg; C</b>
-                    </td>
-                    <td>
-                        <b data-bind="text:clouds.all">waiting...</b><b>%</b>
-                    </td>
-                    <td>
-                        <b data-bind="text:wind.speed">waiting...</b><b>meter/sec</b>
-                    </td>
-                </tr>
+            <tr>
+                <td>
+                    <b data-bind="text:main.pressure">waiting...</b> <b>hPa</b>
+                </td>
+                <td>
+                    <b data-bind="text:main.temp">waiting...</b><b>&deg; C</b>
+                </td>
+                <td>
+                    <b data-bind="text:main.feels_like">waiting...</b><b>&deg; C</b>
+                </td>
+                <td>
+                    <b data-bind="text:clouds.all">waiting...</b><b>%</b>
+                </td>
+                <td>
+                    <b data-bind="text:wind.speed">waiting...</b><b>meter/sec</b>
+                </td>
+            </tr>
             </tbody>
         </table>
     </div>
 
     <div class="col-md-10">
-        <div class="alert alert-danger col-md-10" style="display:none;" id="errorMessage" role="alert">
+        <div class="alert alert-danger col-md-10" style="display: none;" id="errorMessage" role="alert">
 
         </div>
-        <input id="City" class="form-control" placeholder="Enter City Name" />
-    </div><br /><br />
+        <input id="City" class="form-control" placeholder="Enter City Name"/>
+    </div><br/><br/>
 
-          <div class="col-md-10">
-              <button type="submit" class="btn btn-outline-primary" onclick="CallWeatherApi();">Submit</button>
-              <button class="btn btn-primary disabled" onclick="location.href='@Url.Action("Index")'">Go back to menu</button>
-          </div>
+    <div class="col-md-10">
+        <button type="submit" class="btn btn-outline-primary" onclick="CallWeatherApi();">Submit</button>
+        <button class="btn btn-primary disabled" onclick="location.href = '@Url.Action("Index")'">Go back to menu</button>
+    </div>
 </div>
-<br />
+<br/>
 
 
 <script>
@@ -104,11 +104,15 @@
                     url: url,
                     method: 'GET',
                     success: function(response) {
-                        console.log(response);
-                        weather = ko.mapping.fromJS(response);
-                        ko.applyBindings(weather);
-                        $("#dec").text(response.weather[0].description);
-                        $("#icon").attr("src", "http://openweathermap.org/img/w/" + response.weather[0].icon + ".png");
+                        if (response.length == 0) {
+                            alert('Invalid city name')
+                        } else {
+                            console.log(response);
+                            weather = ko.mapping.fromJS(response);
+                            ko.applyBindings(weather);
+                            $("#dec").text(response.weather[0].description);
+                            $("#icon").attr("src", "http://openweathermap.org/img/w/" + response.weather[0].icon + ".png");
+                        }
                     }
                 }
             );

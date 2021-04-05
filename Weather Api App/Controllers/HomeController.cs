@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 using System.Net;
 using System.Web.Mvc;
 using System.Web.Script.Serialization;
@@ -35,6 +36,7 @@ namespace Weather_Api_App.Controllers
             return View();
         }
 
+
         public JsonResult GetWeather(string city)
         {
             var weath = new JsonEditor();
@@ -44,30 +46,47 @@ namespace Weather_Api_App.Controllers
 
             var client = new WebClient();
 
-
-            var content = client.DownloadString(url);
-
-
-            var returnValue = Json(weath.Deserializer(content), JsonRequestBehavior.AllowGet);
-
-            return returnValue;
+             //Try catch for invalid City name which not equals with any city
+            try
+            {
+                var content = client.DownloadString(url);
+                var returnValue = Json(weath.Deserializer(content), JsonRequestBehavior.AllowGet);
+                return returnValue;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
         }
 
         public string GetWeatherForFiveDays(string city)
         {
             //GET JSON FILE AND CONVERT IT
             var serial = new JsonEditor();
-            var url = string.Format("https://api.openweathermap.org/data/2.5/forecast?q={0}&APPID={1}&units=metric", city, _apiKey);
+
+            var url = $"https://api.openweathermap.org/data/2.5/forecast?q={city}&APPID={_apiKey}&units=metric";
+
             var client = new WebClient();
-            var content = client.DownloadString(url);
 
-            Rootobject weatherJsonData = new JavaScriptSerializer().Deserialize<Rootobject>(content);
 
-            //Get selected values and return it to page
-            var selectedWeatherData = new JavaScriptSerializer()
-                .Serialize(serial.SelectWeatherDetails(weatherJsonData));
+            //Try catch for invalid City name which not equals with any city
+            try
+            {
+                var content = client.DownloadString(url);
 
-            return selectedWeatherData;
+                Rootobject weatherJsonData = new JavaScriptSerializer().Deserialize<Rootobject>(content);
+
+                //Get selected values and return it to page
+                var selectedWeatherData = new JavaScriptSerializer()
+                    .Serialize(serial.SelectWeatherDetails(weatherJsonData));
+
+                return selectedWeatherData;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+            
         }
     }
 }
