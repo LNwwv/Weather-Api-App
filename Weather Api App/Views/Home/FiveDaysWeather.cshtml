@@ -11,7 +11,7 @@
     <div class="alert alert-danger" style="display: none;" id="errorMessage" role="alert">
 
     </div>
-    <input id="CityInput" class="form-control" placeholder="Enter City Name"/>
+    <input id="cityInput" class="form-control" placeholder="Enter City Name"/>
 </div>
 <br/>
 @* buttons *@
@@ -22,14 +22,14 @@
 <br/>
 
 
-@* menu *@
+@* data holders x6 *@
 @for (int i = 0; i <= 5; i++)
 {
     <a class="btn btn-primary btn-block" onclick="toggle_visibility('dataHolder-@i');">
         <span id="day"> waiting...</span>
     </a>
 
-    <div id="dataHolder-@i" style="display: none;" class="alert alert-dismissible alert-primary col-lg-12">
+    <div id="dataHolder-@i" style="display: none;" class="data-holder alert alert-dismissible alert-primary col-lg-12">
         <div class="row ">
             <div class="col ">
                 <b> City: </b> <span id="name"> waiting...</span><br/>
@@ -55,12 +55,13 @@
 
 
 @*Api call and print data from json*@
+
 <script>
     function CallWeatherApi() {
 
         var action = '@Url.Action("GetWeatherForFiveDays")';
 
-        var city = $("#CityInput").val();
+        var city = $("#cityInput").val();
 
         if (city.trim().length === 0) {
             var div = document.getElementById('errorMessage');
@@ -74,8 +75,8 @@
                 url: url,
                 method: 'GET',
                 success: function (response) {
-                    if (response.length == 0) {
-                        alert('Invalid city name')
+                    if (response.length === 0) {
+                        alert('Invalid city name');
                     }
                     else {
                         var value = JSON.parse(response);
@@ -94,7 +95,6 @@
                         $("#pressure").html(value.DataByDay[0].AvgPressure);
                         $("#day").html(value.DataByDay[0].DayTime);
                     }
-
                 }
             });
         }

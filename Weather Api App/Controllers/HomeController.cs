@@ -10,6 +10,8 @@ namespace Weather_Api_App.Controllers
     public class HomeController : Controller
     {
         private string _apiKey = ConfigurationManager.AppSettings["ApiKey"];
+        private JsonEditor jsonEditor = new JsonEditor();
+        private WebClient client = new WebClient();
 
         public ActionResult Index()
         {
@@ -39,21 +41,17 @@ namespace Weather_Api_App.Controllers
 
         public JsonResult GetWeather(string city)
         {
-            var weath = new JsonEditor();
-
             var url = "https://api.openweathermap.org/data/2.5/weather?q=" + city +
                       "&APPID=" + _apiKey + "&units=metric";
-
-            var client = new WebClient();
 
              //Try catch for invalid City name which not equals with any city
             try
             {
                 var content = client.DownloadString(url);
-                var returnValue = Json(weath.Deserializer(content), JsonRequestBehavior.AllowGet);
+                var returnValue = Json(jsonEditor.Deserializer(content), JsonRequestBehavior.AllowGet);
                 return returnValue;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return null;
             }
@@ -62,12 +60,8 @@ namespace Weather_Api_App.Controllers
         public string GetWeatherForFiveDays(string city)
         {
             //GET JSON FILE AND CONVERT IT
-            var serial = new JsonEditor();
 
             var url = $"https://api.openweathermap.org/data/2.5/forecast?q={city}&APPID={_apiKey}&units=metric";
-
-            var client = new WebClient();
-
 
             //Try catch for invalid City name which not equals with any city
             try
@@ -78,11 +72,11 @@ namespace Weather_Api_App.Controllers
 
                 //Get selected values and return it to page
                 var selectedWeatherData = new JavaScriptSerializer()
-                    .Serialize(serial.SelectWeatherDetails(weatherJsonData));
+                    .Serialize(jsonEditor.SelectWeatherDetails(weatherJsonData));
 
                 return selectedWeatherData;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return null;
             }
