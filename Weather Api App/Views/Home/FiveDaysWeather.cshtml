@@ -1,4 +1,5 @@
-﻿@{
+﻿<script src="~/Scripts/fiveDayWeathJs.js"></script>
+@{
     ViewBag.Title = "FiveDaysWeather";
 }
 
@@ -22,41 +23,37 @@
 <br/>
 
 
-@* data holders x6 *@
-@for (int i = 0; i <= 5; i++)
+@* data holders x5 *@
+@for (int i = 0; i < 5; i++)
 {
     <a class="btn btn-primary btn-block" onclick="toggle_visibility('dataHolder-@i');">
-        <span id="day"> waiting...</span>
+        <span id="day-@i"> waiting...</span>
     </a>
 
     <div id="dataHolder-@i" style="display: none;" class="data-holder alert alert-dismissible alert-primary col-lg-12">
         <div class="row ">
             <div class="col ">
-                <b> City: </b> <span id="name"> waiting...</span><br/>
-                <b> Country: </b><span id="country"> waiting...</span><br/>
-                <b> Latitude: </b><span id="lat"> waiting...</span><br/>
-                <b> Longitude: </b><span id="lon"> waiting...</span><br/>
-                <b> Visibility: </b><span id="visibility"> waiting...</span>m<br/>
-                <b> Wind speed: </b><span id="wind"> waiting...</span>meters/sec<br/>
+                <b> City: </b> <span id="name-@i"> waiting...</span><br/>
+                <b> Country: </b><span id="country-@i"> waiting...</span><br/>
+                <b> Latitude: </b><span id="lat-@i"> waiting...</span><br/>
+                <b> Longitude: </b><span id="lon-@i"> waiting...</span><br/>
+                <b> Visibility: </b><span id="visibility-@i"> waiting...</span>m<br/>
+                <b> Wind speed: </b><span id="wind-@i"> waiting...</span>meters/sec<br/>
             </div>
             <div class="col">
-                <b> Humidity: </b><span id="humidity"> waiting...</span>%<br/>
-                <b> AvgPressure: </b><span id="pressure"> waiting...</span>hPa<br/>
-                <b> Temperature: </b><span id="temp"> waiting...</span>&deg; C<br/>
-                <b> Temperature feels like: </b><span id="tempfeelslike"> waiting...</span>&deg; C<br/>
-                <b> Min temperature: </b><span id="minTemp"> waiting...</span>&deg; C<br/>
-                <b> Max temperature:: </b><span id="maxTemp"> waiting...</span>&deg; C<br/>
+                <b> Humidity: </b><span id="humidity-@i"> waiting...</span>%<br/>
+                <b> AvgPressure: </b><span id="pressure-@i"> waiting...</span>hPa<br/>
+                <b> Temperature: </b><span id="temp-@i"> waiting...</span>&deg; C<br/>
+                <b> Temperature feels like: </b><span id="tempfeelslike-@i"> waiting...</span>&deg; C<br/>
+                <b> Min temperature: </b><span id="minTemp-@i"> waiting...</span>&deg; C<br/>
+                <b> Max temperature:: </b><span id="maxTemp-@i"> waiting...</span>&deg; C<br/>
             </div>
         </div>
     </div>
 }
 
-
-
-
-@*Api call and print data from json*@
-
 <script>
+    @* Api call and print data from json *@
     function CallWeatherApi() {
 
         var action = '@Url.Action("GetWeatherForFiveDays")';
@@ -68,32 +65,18 @@
             $('#errorMessage').css('display', 'block');
             div.innerHTML = 'Please enter a City';
             div.show();
-
         } else {
             var url = action + "?city=" + city;
             $.ajax({
                 url: url,
                 method: 'GET',
-                success: function (response) {
+                success: function(response) {
                     if (response.length === 0) {
                         alert('Invalid city name');
-                    }
-                    else {
+                    } else {
                         var value = JSON.parse(response);
                         console.log(response);
-                        $('#name').html(value.CityName);
-                        $("#country").html(value.CountryName);
-                        $("#lat").html(value.Coords[0].lat);
-                        $("#lon").html(value.Coords[0].lon);
-                        $("#humidity").html(value.DataByDay[0].AvgHumidity);
-                        $("#tempfeelslike").html(value.DataByDay[0].AvgFeelsLike);
-                        $("#visibility").html(value.DataByDay[0].AvgVisibility);
-                        $("#wind").html(value.DataByDay[0].AvgWindSpeed);
-                        $("#temp").html(value.DataByDay[0].AvgTemp);
-                        $("#maxTemp").html(value.DataByDay[0].AvgMaxTemp);
-                        $("#minTemp").html(value.DataByDay[0].AvgMinTemp);
-                        $("#pressure").html(value.DataByDay[0].AvgPressure);
-                        $("#day").html(value.DataByDay[0].DayTime);
+                        setValue(value);
                     }
                 }
             });
@@ -101,12 +84,3 @@
     }
 </script>
 
-<script>
-    function toggle_visibility(id) {
-        var e = document.getElementById(id);
-        if (e.style.display == 'block')
-            e.style.display = 'none';
-        else
-            e.style.display = 'block';
-    }
-</script>
