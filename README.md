@@ -7,7 +7,6 @@ Weather app project is a service where you can check weather in any city.
 ### What you can check:
 - basic weather in the city
 - weather with more details for selected city
-- What you can check in more detail:
 
 ## Live Demo
 
