@@ -17,7 +17,6 @@ Live demo is available at this link:
 
 ## Tech
 
-Dillinger uses a number of open source projects to work properly:
 
 - C# / .NET
 - ASP.NET MVC
